@@ -4,8 +4,13 @@ import sys
 class MsgHandle:
 
     def _recvmsg(self, socket, size = 1024):
-        encodedmsg = socket.recv(size)
-        return encodedmsg.decode()
+
+        while(1):
+            try:
+                encodedmsg = socket.recv(size)
+            except system.TimeoutException:
+                continue
+            return encodedmsg.decode()
 
     def _sendmsg(self, socket, msg):
         encodedmsg = msg.encode('utf-8')
@@ -31,8 +36,6 @@ class Server(MsgHandle):
 
     def close(self):
         self.s.close()
-
-
 
 
 class Client(MsgHandle):

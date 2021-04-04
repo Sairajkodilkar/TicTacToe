@@ -2,37 +2,43 @@ import pygame
 import sys
 from time import sleep
 
+from board import Board
+
 yellow = pygame.Color("yellow")
 red = pygame.Color("red")
+green = pygame.Color("green")
 
 leftclick = 1
 
-class GuiBoard:
+class GuiBoard(Board):
 
-    def __init__(self, rows, column, rowsize = 64, columnsize = 64, gap = 5, bg = "black"):
+    def __init__(self, height = 400, width = 400, player = "x", rows = 3, column = 3, gap = 5, bg = "black", status = True):
+
+        super().__init__(rows, column, player)
         pygame.init()
 
-        self.rows = rows
-        self.column = column
-        self.gap = gap
-        self.rowsize = rowsize
-        self.columnsize = columnsize
-        self.height = rows * rowsize + gap
-        self.width = column * columnsize + gap
-        
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.gap = 5
+        self.rowsize = 64
+        self.columnsize = 64 
+        self.height = height 
+        self.width = width
+        self.offsetx = int((self.height / 2) - ((self.rowsize * 3 + gap * 4 ) / 2))
+        self.offsety = int((self.width / 2) - ((self.columnsize * 3 + gap * 4 ) / 2))
         self.bg = pygame.Color(bg)
-        self.screen.fill(self.bg)
-        
-
-        pygame.display.set_caption("TIC TAC TOE")
-
         self.clock = pygame.time.Clock()
+        
         self._initGraphics()
+        self._initscreen(status)
         self._intfont()
 
         self.drawboard()
 
+    def _initscreen(self, status):
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("title")
+        self.screen.fill(self.bg)
+        self.showstatus(status)
+        
 
     def _intfont(self):
         pygame.font.init()
@@ -44,44 +50,60 @@ class GuiBoard:
         normallinep = "./resources/normalline.png"
         self.normallinev = pygame.image.load(normallinep)
         self.normallineh = pygame.transform.rotate(self.normallinev, -90)
+
+        greenindicator = "./resources/greenindicator.png"
+        self.greenstatus = pygame.image.load(greenindicator)
+
+        redindicator = "./resources/redindicator.png"
+        self.redstatus = pygame.image.load(redindicator)
+
+    def showstatus(self, status):
+        if(status == True):
+            self.screen.blit(self.greenstatus, [5, 5])
+        else:
+            self.screen.blit(self.redstatus, [5, 5])
+        self.status = status
+        pygame.display.flip()
         
-    def updateboard(self, lis):
+    def updateboard(self):
+        #60 fps game
         self.clock.tick(60) 
         self.screen.fill(self.bg)
+        self.showstatus(self.status)
 
         self.drawboard()
-        self.drawsymbols(lis)
+        self.drawsymbols(self.ttt_board)
 
     def getclick(self):
-        #60 fps game
+        self.showstatus(True)
         while(1):
             event = pygame.event.poll()
 
             if event.type == pygame.QUIT:
                 sys.exit(0)
 
+            mouse = pygame.mouse.get_pos()
             state = pygame.mouse.get_pressed(3)
 
             i = j = None
             if(state[0] == leftclick):
-                mouse = pygame.mouse.get_pos()
 
-                i = int(mouse[0] / 64)
-                j = int(mouse[1] / 64)
+                i = int((mouse[0] - self.offsetx) / 64)
+                j = int((mouse[1] - self.offsety) / 64)
 
-                if(i < self.rows and j < self.column):
+                if(i < self.row and j < self.col):
                     break
-
+        self.showstatus(False)
         return i, j
 
     def drawboard(self):
-        for y in range(self.column + 1):
-            for x in range(self.rows):
-                self.screen.blit(self.normallineh, [x * self.rowsize + 5, y * self.columnsize])
+        for y in range(self.col+ 1):
+            for x in range(self.row):
+                self.screen.blit(self.normallineh, [x * self.rowsize + 5 + self.offsetx, y * self.columnsize + self.offsety])
 
-        for x in range(self.rows + 1):
-            for y in range(self.column):
-                self.screen.blit(self.normallinev, [x * self.rowsize, y * self.columnsize + 5])
+        for x in range(self.row + 1):
+            for y in range(self.col):
+                self.screen.blit(self.normallinev, [x * self.rowsize + self.offsetx, y * self.columnsize + 5 + self.offsety])
 
         pygame.display.flip()
 
@@ -96,8 +118,11 @@ class GuiBoard:
                 elif(symbol == "O"):
                     label = self.olabel
                 if(label):
-                    self.screen.blit(label, [i * (self.rowsize) + 14, j * (self.columnsize) + 10])
+                    self.screen.blit(label, [i * (self.rowsize) + 14 + self.offsetx, j * (self.columnsize) + 10 + self.offsety])
         pygame.display.flip()
+
+
+        
  
     def cont(self):
         for event in pygame.event.get():
@@ -108,13 +133,13 @@ class GuiBoard:
 
 
 if __name__ == "__main__":
-    g = GuiBoard(3, 3, bg = "white")
+    g = GuiBoard(400, 400, 'x', bg = "white")
     lis = [[" " for i in range(3)] for j in range(3)]
     while(g.cont()):
         i, j = g.getclick()
         if(i != None and j != None):
-            lis[i][j] = "O"
-            g.updateboard(lis)
+            g.update(i, j, 'x')
+            g.updateboard()
 
 
 
