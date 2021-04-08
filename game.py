@@ -10,12 +10,18 @@ class LanGame:
 
         self.server = not (not server)
         if(server):
+            self._initserver(port)
+        else:
+            self._initclient(port, hostname)
+    
+    def _initserver(self, port):
             self.play_board = GuiBoard(player="x", status=True)
             self.player = Server(port)
             self.player.connect()
             self.player.sendmsg(self.play_board.player_two)
             print("Server connected")
-        else:
+
+    def _initclient(self, port, hostname):
             self.player = Client(port, hostname)
             self.player.connect()
             sym = self.player.recvmsg()
@@ -23,6 +29,7 @@ class LanGame:
             print("Client connected")
 
     def play(self):
+
         while(not self.gameover()):
             if(server):
                 self.sendmov()
@@ -37,6 +44,8 @@ class LanGame:
                 self.sendmov()
 
         game.player.close()
+
+        return self.play_board.winner
 
     def gameover(self):
         return self.play_board.evaluate() != 0 or self.play_board.isfull()
@@ -65,6 +74,7 @@ class LanGame:
 
 
 if(__name__ == "__main__"):
+    pygame.init()
     server = int(input("server "))
     game = LanGame(server)
     game.play()

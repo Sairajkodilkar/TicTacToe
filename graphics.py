@@ -35,7 +35,7 @@ class GuiBoard(Board):
 
     def _initscreen(self, status):
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("title")
+        pygame.display.set_caption("TicTacToe")
         self.screen.fill(self.bg)
         self.showstatus(status)
         
@@ -122,13 +122,39 @@ class GuiBoard(Board):
         pygame.display.flip()
 
 
-        
- 
     def cont(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
         return 1
+
+
+
+class WelcomeScreen:
+
+    def __init__(self, height = 400, width = 400, bg="black"):
+        pygame.init()
+        self.height = height 
+        self.width = width 
+        self.bg = pygame.Color(bg)
+        self._initscreen()
+        pass
+
+    def _initscreen(self):
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("TicTacToe")
+        self.screen.fill(self.bg)
+        self.showstatus(status)
+
+    def getbuttonpress(self):
+        pass
+
+    def showwindow(self):
+        pass
+
+
+
+
 
 
 
