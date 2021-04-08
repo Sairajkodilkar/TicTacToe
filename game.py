@@ -1,6 +1,8 @@
 from graphics import *
 from board import *
 from network import *
+from minimax import *
+import random
 
 class LanGame:
 
@@ -30,25 +32,24 @@ class LanGame:
 
     def play(self):
 
-        while(not self.gameover()):
+        while(not self.play_board.gameover()):
             if(server):
                 self.sendmov()
-                if(self.gameover()):
+                if(self.play_board.gameover()):
                     break
                 self.recvmov()
 
             if(not server):
                 self.recvmov()
-                if(self.gameover()):
+                if(self.play_board.gameover()):
                     break
                 self.sendmov()
 
         game.player.close()
 
+        self.play_board.showwinner()
         return self.play_board.winner
 
-    def gameover(self):
-        return self.play_board.evaluate() != 0 or self.play_board.isfull()
 
     def sendmov(self):
         while(1):
@@ -73,10 +74,65 @@ class LanGame:
         self.play_board.updateboard()
 
 
+class ComputerGame:
+
+    def __init__(self, player_one="x"):
+            self.play_board = GuiBoard(player=player_one, status=True)
+
+    def play(self, player_one):
+        while(not self.play_board.gameover()):
+            if(player_one):
+                self.getmov()
+            
+            if(self.play_board.gameover()):
+                break
+
+            i, j = findbestmove(self.play_board)
+            self.update_playboard(i, j, self.play_board.player_two)
+            self.play_board.evaluate()
+
+            if(not player_one):
+                self.getmov()
+
+        withcomp.play_board.showwinner()
+        return self.play_board.winner
+
+
+    def getmov(self):
+        while(1):
+            i, j = self.play_board.getclick()
+            if(not self.play_board.isempty(i, j)):
+                continue
+            self.update_playboard(i, j, self.play_board.player_one)
+            self.play_board.evaluate()
+            break
+
+    def update_playboard(self, i, j, player):
+        self.play_board.update(i, j, player)
+        self.play_board.updateboard()
+
+
+
+
+if(__name__ == "__main__"):
+    withcomp = ComputerGame("x")
+    random.seed()
+    random_player = random.randint(0, 1)
+    print(random_player)
+    withcomp.play(player_one=random_player)
+
+
+
+
+
+
+
+
+'''
 if(__name__ == "__main__"):
     pygame.init()
     server = int(input("server "))
     game = LanGame(server)
     game.play()
-
+'''
 

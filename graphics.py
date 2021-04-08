@@ -128,6 +128,23 @@ class GuiBoard(Board):
                 return 0
         return 1
 
+    def showwinner(self):
+        myfont = pygame.font.SysFont("Cosmic Sans MS", 75)
+
+        if(self.winner == self.player_one):
+            winnertext = myfont.render("You Won", 1, green)
+        elif(self.winner == self.player_two):
+            winnertext = myfont.render("You lost", 1, red)
+        else:
+            winnertext = myfont.render("  Draw", 1, yellow)
+
+
+        self.screen.blit(winnertext, [self.offsetx, 10])
+        pygame.display.flip()
+
+        while(self.cont()):
+            pass
+
 
 
 class WelcomeScreen:

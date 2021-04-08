@@ -63,10 +63,14 @@ class Board():
                 self.winner = self.player_two
                 return -10
 
+        self.winner = None
         return 0
 
     def getlist(self):
         return self.ttt_board
+
+    def gameover(self):
+        return self.evaluate() != 0 or self.isfull()
 
     def __repr__(self):
         lis = self.ttt_board
