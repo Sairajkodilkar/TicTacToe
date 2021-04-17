@@ -10,13 +10,14 @@ class LanGame:
 
         print("Connecting to other player...")
 
-        self.server = not (not server)
+        self.server = server
         if(server):
             self._initserver(port)
         else:
             self._initclient(port, hostname)
     
     def _initserver(self, port):
+            print("initializing server")
             self.play_board = GuiBoard(player="x", status=True)
             self.player = Server(port)
             self.player.connect()
@@ -24,6 +25,7 @@ class LanGame:
             print("Server connected")
 
     def _initclient(self, port, hostname):
+            print("initializing client")
             self.player = Client(port, hostname)
             self.player.connect()
             sym = self.player.recvmsg()
@@ -33,13 +35,13 @@ class LanGame:
     def play(self):
 
         while(not self.play_board.gameover()):
-            if(server):
+            if(self.server):
                 self.sendmov()
                 if(self.play_board.gameover()):
                     break
                 self.recvmov()
 
-            if(not server):
+            if(not self.server):
                 self.recvmov()
                 if(self.play_board.gameover()):
                     break
@@ -91,6 +93,9 @@ class ComputerGame:
             self.update_playboard(i, j, self.play_board.player_two)
             self.play_board.evaluate()
 
+            if(self.play_board.gameover()):
+                break
+
             if(not player_one):
                 self.getmov()
 
@@ -112,14 +117,33 @@ class ComputerGame:
         self.play_board.updateboard()
 
 
-
-
 if(__name__ == "__main__"):
-    withcomp = ComputerGame("x")
-    random.seed()
-    random_player = random.randint(0, 1)
-    print(random_player)
-    withcomp.play(player_one=random_player)
+    while(1):
+        wcs = WelcomeScreen()
+        option = wcs.get_selected_option()
+
+        if(option == 0):
+            withcomp = ComputerGame("x")
+            random.seed()
+            random_player = random.randint(0, 1)
+            withcomp.play(player_one=random_player)
+            continue
+
+        if(option == 1):
+            game = LanGame(True)
+            game.play()
+            game.player.close()
+            continue
+
+        if(option == 2):
+            game = LanGame(False)
+            game.play()
+            game.player.close()
+            continue
+
+        if(option == 3):
+            exit(0)
+            continue
 
 
 
@@ -128,11 +152,15 @@ if(__name__ == "__main__"):
 
 
 
-'''
-if(__name__ == "__main__"):
-    pygame.init()
-    server = int(input("server "))
-    game = LanGame(server)
-    game.play()
-'''
+
+
+
+
+
+
+
+
+
+
+
 

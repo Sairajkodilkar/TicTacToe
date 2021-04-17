@@ -6,6 +6,7 @@ from board import Board
 
 yellow = pygame.Color("yellow")
 red = pygame.Color("red")
+red1 = pygame.Color("red1")
 green = pygame.Color("green")
 
 leftclick = 1
@@ -141,48 +142,94 @@ class GuiBoard(Board):
 
         self.screen.blit(winnertext, [self.offsetx, 10])
         pygame.display.flip()
+        sleep(3)
 
-        while(self.cont()):
-            pass
+
 
 
 
 class WelcomeScreen:
 
-    def __init__(self, height = 400, width = 400, bg="black"):
+    def __init__(self, height = 400, width = 400, maincolor=red,
+            highlight=yellow, bg="black"):
+
         pygame.init()
         self.height = height 
         self.width = width 
         self.bg = pygame.Color(bg)
+        self.clock = pygame.time.Clock()
+
+        self.maincolor = maincolor
+        self.highlight = highlight
+        self.select = 0
+        self.rawtext = {"Computer":1, "Host":0, "Connect":0, "Quit":0}
+
+        self.optionlist = []
         self._initscreen()
+        self._inittext()
+        self.show_options()
         pass
 
     def _initscreen(self):
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("TicTacToe")
         self.screen.fill(self.bg)
-        self.showstatus(status)
 
-    def getbuttonpress(self):
-        pass
+    def _inittext(self):
+        self.myfont = pygame.font.SysFont("Cosmic Sans MS", 75)
+        for option in self.rawtext:
+            if(self.rawtext[option] == 1):
+                self.optionlist += [self.myfont.render(option, 1, self.highlight)]
+            else:
+                self.optionlist += [self.myfont.render(option, 1, self.maincolor)]
 
-    def showwindow(self):
-        pass
+ 
+    def select_option(self, select):
+        optlist = ["Computer", "Host", "Connect", "Quit"]
+        self.rawtext[self.select] = 0
+        self.optionlist[self.select] = self.myfont.render(optlist[self.select], 1, self.maincolor)
 
+        self.select = select
+        opt = optlist[select]
 
-
-
-
-
-
-if __name__ == "__main__":
-    g = GuiBoard(400, 400, 'x', bg = "white")
-    lis = [[" " for i in range(3)] for j in range(3)]
-    while(g.cont()):
-        i, j = g.getclick()
-        if(i != None and j != None):
-            g.update(i, j, 'x')
-            g.updateboard()
+        self.optionlist[select] = self.myfont.render(opt, 1, self.highlight)
 
 
+    def show_options(self):
+        self.clock.tick(60) 
+
+        xcord = self.width / 2 
+        ycord = self.height / 8
+
+        for option in self.optionlist:
+            text_rect = option.get_rect(center=[xcord, ycord])
+            self.screen.blit(option, text_rect)
+            ycord += self.height / 4
+        
+        pygame.display.flip()
+
+    def get_selected_option(self):
+
+        while True:
+            self.clock.tick(60) 
+            event = pygame.event.poll()
+
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+
+
+            keys_pressed = pygame.key.get_pressed()
+
+            if keys_pressed[pygame.K_RETURN]:
+                return self.select
+
+            if keys_pressed[pygame.K_UP]:
+                self.select_option((self.select - 1) % 4)
+                self.show_options()
+                sleep(0.25)
+            
+            if keys_pressed[pygame.K_DOWN]:
+                self.select_option((self.select + 1) % 4)
+                self.show_options()
+                sleep(0.25)
 
